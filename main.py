@@ -7,6 +7,6 @@ import operator, rysownik, os
 
 otwieracz = operator.Operator()
 zapisywacz = rysownik.Rysownik()
-piki = otwieracz.otworzPliki('./samples/')
+piki = otwieracz.otworzPliki('samples/')
 zapis = otwieracz.scalPiki(piki)
 zapisywacz.saveData(zapis)

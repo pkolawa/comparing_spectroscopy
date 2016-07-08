@@ -10,7 +10,7 @@ class Rysownik:
 		pass
 
 	def saveData(self, insertedData):
-		with open('output.csv', 'w', newline='') as csvfile:
+		with open('samples/output.csv', 'w', newline='') as csvfile:
 			spamwriter = csv.writer(csvfile, delimiter=';',quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			for datas in insertedData:
 				spamwriter.writerow(datas)
