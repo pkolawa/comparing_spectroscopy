@@ -31,9 +31,9 @@ class Operator():
 					else:
 						j = i - 1
 						abs_wstecz = pik[j]['abs']
-						delta = abs - pik[j]['abs']
+						delta = round(abs - pik[j]['abs'], 5)
 						if (pik[j]['abs'] != 0):
-							delta_perc =  (delta * abs_wstecz) * 100
+							delta_perc =  round((delta / abs_wstecz) * 100, 5)
 					#Dodaje tablice z wynikiem w danej sekundzie (tozsamej z indexem tablicy)
 					pik.append({'czas':sekunda, 'abs':abs, 'delta':delta, 'proc':delta_perc})
 					i = i + 1
@@ -81,7 +81,7 @@ class Operator():
 			# print(i)
 			for pik in pikis:
 				if(i < len(pikis[pik])):
-					pikScalonyTemp.append(pikis[pik][i]['abs'])
+					pikScalonyTemp.append(str(pikis[pik][i]['abs']).replace(".",","))
 				else:
 					pikScalonyTemp.append(0)
 
@@ -89,7 +89,7 @@ class Operator():
 
 			for pik in pikis:
 				if (i < len(pikis[pik])):
-					pikScalonyTemp.append(pikis[pik][i]['delta'])
+					pikScalonyTemp.append(str(pikis[pik][i]['delta']).replace(".",","))
 				else:
 					pikScalonyTemp.append(0)
 
@@ -97,7 +97,7 @@ class Operator():
 
 			for pik in pikis:
 				if (i < len(pikis[pik])):
-					pikScalonyTemp.append(pikis[pik][i]['proc'])
+					pikScalonyTemp.append(str(pikis[pik][i]['proc']).replace(".",","))
 				else:
 					pikScalonyTemp.append(0)
 
