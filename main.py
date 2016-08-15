@@ -1,11 +1,10 @@
 #!/usr/bin/python
 
-import operator, rysownik, os
+import operatorek, rysownik, os
 
 # sensitivity = os.argv[1]
 
-
-otwieracz = operator.Operator()
+otwieracz = operatorek.Operator()
 zapisywacz = rysownik.Rysownik()
 piki = otwieracz.otworzPliki('samples/')
 zapis = otwieracz.scalPiki(piki)
