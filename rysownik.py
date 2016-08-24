@@ -14,3 +14,4 @@ class Rysownik:
 			spamwriter = csv.writer(csvfile, delimiter=';',quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			for datas in insertedData:
 				spamwriter.writerow(datas)
+

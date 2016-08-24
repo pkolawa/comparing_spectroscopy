@@ -13,31 +13,35 @@ class Operator():
     # def rozpakujZIP(self):
 
     def otworzPliki(self, directory):
+        print(os.listdir(directory))
         for infile in os.listdir(directory):
-            infileDir = directory + infile
-            with open(infileDir, 'r') as csvfile:
-                pik = []
-                spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
-                i = 0
-                for row in spamreader:
-                    if(row[0] == "s" or row[0] == "Created as New Dataset"):
-                        continue
-                    sekunda = int(float(row[0].replace(",",".")))
-                    abs = float(row[1].replace(",","."))
-                    delta_perc = 0.00000
-                    if (i == 0):
-                        delta = 0.0
-                    else:
-                        j = i - 1
-                        abs_wstecz = pik[j]['abs']
-                        delta = round(abs - pik[j]['abs'], 5)
-                        if (pik[j]['abs'] != 0):
-                            delta_perc =  round((delta / abs_wstecz) * 100, 5)
-                    #Dodaje tablice z wynikiem w danej sekundzie (tozsamej z indexem tablicy)
-                    pik.append({'czas':sekunda, 'abs':abs, 'delta':delta, 'proc':delta_perc})
-                    i = i + 1
-                self.piki[infile] = pik
+            if infile == ".DS_Store" or infile == "output.csv":
+                os.remove(directory + infile)
+            else:
+                infileDir = directory + infile
 
+                with open(infileDir, 'r') as csvfile:
+                    pik = []
+                    spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
+                    i = 0
+                    for row in spamreader:
+                        if(row[0] == "s" or row[0] == "Created as New Dataset"):
+                            continue
+                        sekunda = int(float(row[0].replace(",",".")))
+                        abs = float(row[1].replace(",","."))
+                        delta_perc = 0.00000
+                        if (i == 0):
+                            delta = 0.0
+                        else:
+                            j = i - 1
+                            abs_wstecz = pik[j]['abs']
+                            delta = round(abs - pik[j]['abs'], 5)
+                            if (pik[j]['abs'] != 0):
+                                delta_perc =  round((delta / abs_wstecz) * 100, 5)
+                        #Dodaje tablice z wynikiem w danej sekundzie (tozsamej z indexem tablicy)
+                        pik.append({'czas':sekunda, 'abs':abs, 'delta':delta, 'proc':delta_perc})
+                        i = i + 1
+                    self.piki[infile] = pik
         return self.piki
 
         # for pomiar in self.piki:
@@ -69,71 +73,77 @@ class Operator():
             pikiScaloneHead.append(pik+(' - abs'))
             pikiScaloneHead.append(pik+(' - delta'))
             pikiScaloneHead.append(pik + (' - proc'))
-            pikiScaloneHead.append(' | ')
+            pikiScaloneHead.append('====')
         pikiScalone.append(pikiScaloneHead)
 
 
-        maxtab = []
-        mintab = []
-        mn, mx = 0,0
-        mnpos, mxpos = 0,0
-        isLookingForMax = False
-        isLookingForMin = False
-        hasStartedPeak = False
+        #Szukanie poczatku pierwszego piku
+        pikStart = {}
+        for pik in pikis:
+            pikStart[pik] = 0
 
+        for pik in pikis:
+            if pikStart[pik] == 0:
+                for i in range(timeStart, pikStop, timeDelta):
+                    if 100.0 != pikis[pik][i]['proc'] and 200.0 != pikis[pik][i]['proc'] and 0.0 != pikis[pik][i]['proc'] and 50.0 != pikis[pik][i]['proc'] and -100.0 != pikis[pik][i]['proc'] and -200.0 != pikis[pik][i]['proc'] and -50.0 != pikis[pik][i]['proc']:
+                        pikStart[pik] = i
+                        break
+            else:
+                break
 
-        lookformax = True
+        #Usuwanie szumow przed pikiem
+        for pik in pikis:
+            for i in range(0, pikStart[pik], timeDelta):
+                pikis[pik].pop(0)
+            pikis[pik].insert(0,{'abs':0.0,'delta':0.0,'proc':0.0})
 
-        for i in range(timeStart, pikStop, timeDelta):
+        #Szukanie najdluzszego pomiaru celem usuniecia ogona wynikajacego z uciecia poczatku
+        longestArray = 0
+        for pik in pikis:
+            if len(pikis[pik]) > longestArray:
+                longestArray = len(pikis[pik])
+
+        for i in range(timeStart, longestArray, timeDelta):
             pikScalonyTemp = [i]
-            # print(i)
             for pik in pikis:
-                #Rozpoczecie piku na podstawie danych
-                if hasStartedPeak == False:
-                    if math.fabs(pikis[pik][i]['proc']) != 100.0 and math.fabs(pikis[pik][i]['proc']) != 200.0 and math.fabs(pikis[pik][i]['proc']) != 0.0:
-                        hasStartedPeak = True
-
                 #Dodanie kolumny z danymi odnosnie absorbancji
                 if(i < len(pikis[pik])):
                     pikScalonyTemp.append(str(pikis[pik][i]['abs']).replace(".",","))
                 else:
-                    pikScalonyTemp.append("-")
+                    pikScalonyTemp.append("")
 
                 #Dodanie kolumny ze zmiana wzgledem poprzedniego pomiaru (delta)
                 #Sprawdzenie czy jest jeszcze w tym przedziale czasowym rekord i jezeli jest to przyporzadkowanie danych i rozpoznanie ekstremow funkcji
                 if (i < len(pikis[pik])):
                     pikScalonyTemp.append(str(pikis[pik][i]['delta']).replace(".",","))
-                    #Sprawdzenie, czy jezeli szukamy minimum nastepuje trend wzrostowy
-                    if isLookingForMin == True and pikis[pik][i]['delta'] < 0:
-                        mintab.append({'peakPos':i,'peakValue':pikis[pik][i]['abs']})
-                    #Zamiana na szukanie maksimum, bo nastepuje trend wzrostowy
-                    if hasStartedPeak == True and pikis[pik][i]['delta'] > 0:
-                        isLookingForMax = True
-                        isLookingForMin = False
-                    #sprawdzenie, czy jezeli szukamy minimum, nastepuje trend malejacy
-                    if isLookingForMax == True and pikis[pik][i]['delta'] < 0:
-                        maxtab.append({'peakPos':i,'peakValue':pikis[pik][i]['abs']})
-                    #Zamiana na szukanie minimum, gdyz nastepuje trend malejacy
-                    if hasStartedPeak == True and pikis[pik][i]['delta'] < 0:
-                        isLookingForMax = False
-                        isLookingForMin = True
                 #Nie pokazujemy nic, poniewaz w tym pomiarze nie ma juz rekordow
                 else:
-                    pikScalonyTemp.append("-")
+                    pikScalonyTemp.append("")
 
                 #Dodanie kolumny ze zmiana podana w procentach
                 if (i < len(pikis[pik])):
                     pikScalonyTemp.append(str(pikis[pik][i]['proc']).replace(".",","))
                 else:
-                    pikScalonyTemp.append("-")
+                    pikScalonyTemp.append("")
 
                 #Rozdzielenie kolumn
-                pikScalonyTemp.append('|')
+                pikScalonyTemp.append('====')
 
             pikiScalone.append(pikScalonyTemp)
-        #Pokazanie listy ekstremow (minimum)
-        print(mintab)
-        #Pokazanie listy ekstremow (maksimum)
-        print(maxtab)
-        
+
+        #Pytanie o wartosci w danym punkcie
+        keepAsking = True
+        while keepAsking:
+            selectedTime = input("Podaj czas, ktory chcesz sprawdzic \n(aby zakonczyc, nacisnij Q)\n")
+            if selectedTime == "Q" or selectedTime == "q":
+                keepAsking = False
+            else:
+                selectedTime = int(selectedTime)
+                print("==================================")
+                print("Dla pomiaru " + str(selectedTime) + " po znormalizowaniu wartosci wynosza odpowiedni:")
+                for pik in pikis:
+                    print(pik + ": "+ str(pikis[pik][selectedTime]['abs']))
+                print("==================================\n\n")
+
+
         return pikiScalone
