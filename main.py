@@ -6,6 +6,12 @@ import operatorek, rysownik, os
 
 otwieracz = operatorek.Operator()
 zapisywacz = rysownik.Rysownik()
-piki = otwieracz.otworzPliki('./samples/')
-zapis = otwieracz.scalPiki(piki)
-zapisywacz.saveData(zapis)
+nazwa_katalogu = input("Podaj nazwe katalogu w ktorym znajduja sie probki:\n")
+print("=============================================")
+while(nazwa_katalogu == ""):
+    nazwa_katalogu = input("Podaj nazwe katalogu w ktorym znajduja sie probki:\n")
+    print("=============================================")
+if(nazwa_katalogu != ""):
+    piki = otwieracz.otworzPliki('./'+str(nazwa_katalogu)+'/')
+    zapis = otwieracz.scalPiki(piki)
+    zapisywacz.saveData(zapis, nazwa_katalogu)

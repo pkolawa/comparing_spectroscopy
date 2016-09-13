@@ -3,6 +3,9 @@
 ###
 
 import os, csv, math
+from matplotlib import pyplot as plt
+import numpy as np
+import matplotlib
 
 class Operator():
     piki = {}
@@ -103,6 +106,21 @@ class Operator():
             if len(pikis[pik]) > longestArray:
                 longestArray = len(pikis[pik])
 
+        #Rysowanie wykresu
+        colors = ['g','b','r','y','o']
+        colorIndex = 0
+        for pik in pikis:
+            for i in range(timeStart, longestArray, timeDelta):
+                if (i < len(pikis[pik])):
+                    if i == timeStart:
+                        plt.scatter(i, pikis[pik][i]['abs'], 40, c=colors[colorIndex], alpha=0.5, label=pik)
+                    else:
+                        plt.scatter(i, pikis[pik][i]['abs'], 40, c=colors[colorIndex], alpha=0.5)
+            colorIndex += 1
+            if colorIndex == 5:
+                colorIndex = 0
+
+        #Scalanie piku
         for i in range(timeStart, longestArray, timeDelta):
             pikScalonyTemp = [i]
             for pik in pikis:
@@ -145,5 +163,9 @@ class Operator():
                     print(pik + ": "+ str(pikis[pik][selectedTime]['abs']))
                 print("==================================\n\n")
 
+        plt.xlabel("Czas")
+        plt.ylabel("Abs")
+        plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+        plt.show()
 
         return pikiScalone
