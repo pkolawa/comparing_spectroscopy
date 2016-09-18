@@ -107,7 +107,7 @@ class Operator():
                 longestArray = len(pikis[pik])
 
         #Rysowanie wykresu
-        colors = ['g','b','r','y','o']
+        colors = ['g','b','r','y','navy','fuchsia','deeppink','turquoise','cyan','dodgerblue','peru','lightsage']
         colorIndex = 0
         for pik in pikis:
             for i in range(timeStart, longestArray, timeDelta):
